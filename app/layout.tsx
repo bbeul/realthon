@@ -32,7 +32,7 @@ export default function RootLayout({
       >
         <HeaderBar />
         <div>{children}</div>
-        <Toaster />
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   );

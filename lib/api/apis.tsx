@@ -59,3 +59,31 @@ export const postChat = async (data: ChatRequest): Promise<ChatResponse> => {
   const res = await apiClient.post("/chat", data);
   return res.data;
 };
+
+export interface ProfileResponse {
+  id: string;
+  user: {
+    name: string;
+    nickname: string;
+    email: string;
+    age?: number;
+    sex?: number;
+  };
+  univ?: string;
+  major?: string;
+  grade?: string;
+  gpa?: string;
+  company?: string;
+  job?: string;
+  ref_score?: number;
+  career_year?: number;
+  profile_data?: Record<string, any>;
+  profile_tags?: string[];
+  created_at?: string;
+}
+
+// user-id로 프로필 조회 API
+export const getProfile = async (userId: string): Promise<ProfileResponse> => {
+  const res = await apiClient.get(`/profile/${userId}`);
+  return res.data;
+};

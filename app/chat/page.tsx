@@ -4,10 +4,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { postChat, ChatResponse, ChatSource } from "@/lib/api/apis";
+import { postChat, ChatSource } from "@/lib/api/apis";
 
 const coffeeColors = {
-  background: "#f8f5f1",
+  background: "#f9f6f2",
   chatBubbleUser: "#c7a17a",
   chatBubbleOther: "#ede0d4",
   text: "#4e342e",
@@ -90,201 +90,76 @@ export default function ChatPage() {
 
   return (
     <div
-      style={{
-        minHeight: "100vh",
-        width: "100vw",
-        background: coffeeColors.background,
-        fontFamily: "Pretendard, sans-serif",
-        color: coffeeColors.text,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
+      className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#f9f6f2] to-[#f7efe2]"
+      style={{ minHeight: "calc(100vh - 64px)" }}
     >
-      {/* 상단 고정 헤더 */}
-      <header
-        style={{
-          width: "100%",
-          maxWidth: 640,
-          position: "fixed",
-          top: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          background: "#fffaf3cc",
-          borderBottom: `1.5px solid ${coffeeColors.border}`,
-          zIndex: 10,
-          padding: "0 0 0 0",
-          display: "flex",
-          alignItems: "center",
-          height: 64,
-          justifyContent: "center",
-          fontWeight: 700,
-          fontSize: 22,
-          letterSpacing: -1,
-          boxShadow: "0 2px 8px 0 rgba(200,160,120,0.04)",
-          backdropFilter: "blur(2px)",
-        }}
+      <div
+        className="w-full max-w-xl flex flex-col rounded-2xl shadow-lg border border-gray-200 bg-white"
+        style={{ minHeight: 600, height: "80vh" }}
       >
-        <span style={{ color: coffeeColors.accent }}>☕️ LatteChat</span>
-      </header>
-
-      {/* 채팅 영역 */}
-      <main
-        style={{
-          width: "100%",
-          maxWidth: 640,
-          flex: 1,
-          marginTop: 80,
-          marginBottom: 96,
-          display: "flex",
-          flexDirection: "column",
-          background: "#fffaf3",
-          borderRadius: 24,
-          border: `1.5px solid ${coffeeColors.border}`,
-          boxShadow: "0 4px 32px 0 rgba(200,160,120,0.10)",
-          minHeight: "60vh",
-          overflow: "hidden",
-        }}
-      >
-        <CardContent
-          style={{
-            flex: 1,
-            overflowY: "auto",
-            padding: "2rem 1.2rem 1rem 1.2rem",
-            display: "flex",
-            flexDirection: "column",
-            gap: 18,
-            background: "transparent",
-          }}
+        <div
+          className="flex-1 overflow-y-auto px-6 py-8"
+          style={{ minHeight: 400 }}
         >
           {messages.map((msg) => (
             <div
               key={msg.id}
-              style={{
-                alignSelf: msg.user === "me" ? "flex-end" : "flex-start",
-                maxWidth: "80%",
-                marginBottom: 2,
-                display: "flex",
-                flexDirection: msg.user === "me" ? "row-reverse" : "row",
-                alignItems: "flex-end",
-                gap: 8,
-              }}
+              className={`flex mb-3 ${
+                msg.user === "me" ? "justify-end" : "justify-start"
+              }`}
             >
-              {/* 프로필 아바타 */}
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
-                  background:
+              <div className="flex items-end gap-2 max-w-[80%]">
+                <Card
+                  className={`shadow-none border-0 ${
                     msg.user === "me"
-                      ? coffeeColors.chatBubbleUser
-                      : coffeeColors.chatBubbleOther,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 700,
-                  fontSize: 18,
-                  color: msg.user === "me" ? "#fff" : coffeeColors.accent,
-                  boxShadow:
-                    msg.user === "me"
-                      ? "0 2px 8px rgba(200,160,120,0.10)"
-                      : "none",
-                  border:
-                    msg.user === "me"
-                      ? "none"
-                      : `1.5px solid ${coffeeColors.border}`,
-                }}
-                aria-label={msg.user === "me" ? "나" : "챗봇"}
-              >
-                {msg.user === "me" ? "나" : "AI"}
-              </div>
-              <Card
-                style={{
-                  background:
-                    msg.user === "me"
-                      ? coffeeColors.chatBubbleUser
-                      : coffeeColors.chatBubbleOther,
-                  color: coffeeColors.text,
-                  borderRadius:
-                    msg.user === "me"
-                      ? "18px 18px 4px 18px"
-                      : "18px 18px 18px 4px",
-                  boxShadow: "0 2px 8px rgba(200,160,120,0.07)",
-                  border: "none",
-                  minWidth: 60,
-                  padding: 0,
-                  margin: 0,
-                }}
-              >
-                <CardContent
+                      ? "bg-[#c7a17a] text-white rounded-2xl rounded-br-md"
+                      : "bg-[#ede0d4] text-brown-700 rounded-2xl rounded-bl-md"
+                  }`}
                   style={{
-                    padding: "13px 20px",
-                    fontSize: 16,
-                    wordBreak: "break-word",
-                    background: "transparent",
-                    lineHeight: 1.7,
+                    minWidth: 60,
+                    maxWidth: "100%",
                   }}
                 >
-                  {msg.text}
-                  {msg.user === "other" &&
-                    msg.sources &&
-                    msg.sources.length > 0 && (
-                      <div
-                        style={{
-                          marginTop: 12,
-                          background: "#f5efe6",
-                          borderRadius: 10,
-                          padding: "10px",
-                          fontSize: 13,
-                          color: "#7c5c3e",
-                          border: `1px solid ${coffeeColors.border}`,
-                        }}
-                      >
-                        <div style={{ fontWeight: 600, marginBottom: 4 }}>
-                          🔗 답변에 참고된 프로필
+                  <CardContent className="py-3 px-5 text-base break-words">
+                    {msg.text}
+                    {msg.user === "other" &&
+                      msg.sources &&
+                      msg.sources.length > 0 && (
+                        <div className="mt-3 bg-[#f5efe6] rounded-lg p-3 text-xs text-[#7c5c3e] border border-[#e0d6c3]">
+                          <div className="font-semibold mb-1">
+                            🔗 답변에 참고된 프로필
+                          </div>
+                          <ul className="pl-3">
+                            {msg.sources.map((src, idx) => (
+                              <li key={idx} className="mb-1">
+                                <span className="font-medium">
+                                  프로필ID: {src.profile_id}
+                                </span>
+                                <span className="ml-2 text-[11px]">
+                                  (유저: {src.user_id}, 관련도:{" "}
+                                  {src.relevance_score}, 다양성:{" "}
+                                  {src.temperature})
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
-                        <ul style={{ paddingLeft: 16, margin: 0 }}>
-                          {msg.sources.map((src, idx) => (
-                            <li key={idx} style={{ marginBottom: 2 }}>
-                              <span style={{ fontWeight: 500 }}>
-                                프로필ID: {src.profile_id}
-                              </span>
-                              <span style={{ marginLeft: 8, fontSize: 12 }}>
-                                (유저: {src.user_id}, 관련도:{" "}
-                                {src.relevance_score}, 다양성: {src.temperature}
-                                )
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                </CardContent>
-              </Card>
+                      )}
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           ))}
           {loading && (
-            <div
-              style={{
-                alignSelf: "flex-start",
-                margin: "8px 0 0 44px",
-                color: coffeeColors.accent,
-                fontSize: 15,
-                opacity: 0.7,
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
+            <div className="flex items-center gap-2 text-[#a67c52] text-sm opacity-70 mt-2">
               <span
+                className="inline-block"
                 style={{
                   width: 16,
                   height: 16,
                   border: "2.5px solid #e0c9b2",
                   borderTop: "2.5px solid #c7a17a",
                   borderRadius: "50%",
-                  display: "inline-block",
                   animation: "spin 1s linear infinite",
                 }}
               />
@@ -295,76 +170,30 @@ export default function ChatPage() {
             </div>
           )}
           <div ref={chatEndRef} />
-        </CardContent>
-      </main>
-
-      {/* 입력창 고정 */}
-      <footer
-        style={{
-          width: "100%",
-          maxWidth: 640,
-          position: "fixed",
-          left: "50%",
-          bottom: 0,
-          transform: "translateX(-50%)",
-          background: "#fffaf3",
-          borderTop: `1.5px solid ${coffeeColors.border}`,
-          borderRadius: "0 0 16px 16px",
-          boxShadow: "0 -2px 8px rgba(200,160,120,0.04)",
-          padding: "0 0 0 0",
-          zIndex: 10,
-        }}
-      >
-        <CardContent
-          style={{
-            padding: "1rem 1.2rem",
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            background: "transparent",
-          }}
-        >
+        </div>
+        {/* 입력창 고정 */}
+        <div className="w-full border-t border-gray-200 bg-[#f9f6f2] rounded-b-2xl px-6 py-4 flex items-center gap-3 flex-shrink-0">
           <Input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleInputKeyDown}
             placeholder="메시지를 입력하세요..."
-            style={{
-              flex: 1,
-              background: "#fff",
-              borderRadius: 8,
-              fontSize: 16,
-              border: `1.5px solid ${coffeeColors.border}`,
-              padding: "12px 16px",
-              outline: "none",
-            }}
+            className="flex-1 bg-white rounded-lg border border-gray-200 px-4 py-3 text-base outline-none"
             disabled={loading}
             aria-label="메시지 입력"
             autoFocus
           />
           <Button
             onClick={handleSend}
-            style={{
-              background: coffeeColors.chatBubbleUser,
-              color: "#fff",
-              borderRadius: 8,
-              fontWeight: 600,
-              fontSize: 16,
-              minWidth: 80,
-              height: 44,
-              boxShadow: "0 2px 8px rgba(200,160,120,0.07)",
-              transition: "background 0.2s",
-              opacity: loading || !input.trim() ? 0.6 : 1,
-              cursor: loading || !input.trim() ? "not-allowed" : "pointer",
-            }}
+            className="bg-[#c7a17a] text-white rounded-lg font-semibold text-base min-w-[80px] h-11 shadow-sm transition disabled:opacity-60"
             disabled={loading || !input.trim()}
             aria-label="메시지 보내기"
           >
             보내기
           </Button>
-        </CardContent>
-      </footer>
+        </div>
+      </div>
     </div>
   );
 }
