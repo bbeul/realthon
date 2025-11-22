@@ -41,7 +41,7 @@ async def create_question(
     question_text = query.text
 
     answer = await chatbot_service.run_pipeline(query_id,question_text)
-    return {"answer": answer}
+    return answer
 
 
 # 2) 답변 생성: POST /chat/answers

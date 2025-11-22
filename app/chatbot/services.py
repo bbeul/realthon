@@ -177,6 +177,41 @@ class ChatBotService:
 
         # 5) 답변 생성
         answer = self.generate_answer(chunk_dict, user_question)
+        user_datas = []
+        async with AsyncSessionLocal() as session:
+            for user_id in user_ids:
+                result = await session.execute(
+                    text("""
+                            SELECT id, name, nickname, email, age, sex
+                            FROM "user"
+                            WHERE id = :user_id
+                        """),
+                    {"user_id": user_id}
+                )
+                row = result.fetchone()
+                if row:
+                    user_datas.append({
+                        "id": row.id,
+                        "name": row.name,
+                        "nickname": row.nickname,
+                        "email": row.email,
+                        "age": row.age,
+                        "sex": row.sex
+                    })
+                else:
+                    user_datas.append({})  # 혹시 없을 경우 빈 dict
+
+        sources = []
+        for i, (profile_id, user_data) in enumerate(zip(profile_ids[:3], user_datas[:3])):
+            sources.append({
+                "profile_id": str(profile_id),
+                "user_data": user_data,
+                "relevance_score": float(0.9 - i * 0.1)
+            })
+
         await self.save_answer_record(query_id, profile_ids, user_ids, answer)
-        
-        return answer
+
+        return {
+            "text": answer,
+            "sources": sources
+        }
