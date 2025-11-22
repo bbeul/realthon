@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+asyncpg
+sqlalchemy[asyncio]
+psycopg2-binary
+python-dotenv
+supabase
+openai
+pgvector
+
