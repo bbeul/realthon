@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 from app.repository.UserRepository import UserRepository
 from app.utils import hash_password
-from app.schemas import UserCreate
+from app.schemas import UserCreate, UserUpdate
 
 class UserService:
     def __init__(self, session: AsyncSession):
