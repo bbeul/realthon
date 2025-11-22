@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Toaster, toast } from "sonner";
+import { createQuestion } from "@/lib/api/apis";
 
 // TODO: 실제 멘토 정보와 API 연동 필요
 const mentor = {
@@ -26,8 +27,11 @@ export default function SendPage() {
     }
     setLoading(true);
     try {
-      // TODO: 실제 API 연동
-      await new Promise((res) => setTimeout(res, 1000));
+      await createQuestion({
+        created_by: "asdf",
+        title,
+        content,
+      });
       toast.success("질문이 성공적으로 전송되었습니다!");
       setTitle("");
       setContent("");

@@ -11,10 +11,12 @@ import { toast } from "sonner";
 export default function SignupPage() {
   const router = useRouter();
   const [form, setForm] = useState({
-    email: "",
-    username: "",
+    name: "",
     nickname: "",
+    email: "",
     password: "",
+    age: "",
+    sex: "",
   });
   const [step, setStep] = useState<"form" | "done">("form");
   const [userId, setUserId] = useState<string | null>(null);
@@ -26,11 +28,14 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      console.log("Submitting signup form with data:", form);
       const res = await signup({
-        email: form.email,
-        username: form.username,
+        name: form.name,
         nickname: form.nickname,
+        email: form.email,
         password: form.password,
+        age: form.age ? Number(form.age) : undefined,
+        sex: form.sex ? Number(form.sex) : undefined,
       });
       setUserId(res.id);
       setStep("done");
@@ -42,17 +47,17 @@ export default function SignupPage() {
 
   const handleSkip = () => {
     if (userId) {
-      router.push(`/profile?id=${userId}`);
+      router.push(`/save-profile?id=${userId}`);
     } else {
-      router.push("/profile");
+      router.push("/save-profile");
     }
   };
 
   const handleGoToIntro = () => {
     if (userId) {
-      router.push(`/profile?id=${userId}`);
+      router.push(`/save-profile?id=${userId}`);
     } else {
-      router.push("/profile");
+      router.push("/save-profile");
     }
   };
 
@@ -74,14 +79,32 @@ export default function SignupPage() {
         <CardContent className="py-10 flex flex-col gap-7">
           {step === "form" ? (
             <>
-              <div className="text-xl font-bold text-center text-[#a98467]">
-                당신의 정보를 알려주세요
+              <div className="w-full flex justify-center">
+                <div className="text-xl font-bold text-center text-[#322219] whitespace-nowrap">
+                  당신의 정보를 알려주세요.
+                </div>
               </div>
               <form
                 className="flex flex-col gap-5"
                 onSubmit={handleSubmit}
                 autoComplete="off"
               >
+                <Input
+                  type="text"
+                  name="name"
+                  placeholder="이름을 입력하세요"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                  autoComplete="name"
+                  className="text-xs focus:border-[#322219] focus:ring-0"
+                  style={{
+                    fontSize: "14px",
+                    background: "#f9f6f2",
+                    color: "#322219",
+                    width: "100%",
+                  }}
+                />
                 <Input
                   type="email"
                   name="email"
@@ -90,29 +113,12 @@ export default function SignupPage() {
                   onChange={handleChange}
                   required
                   autoComplete="email"
-                  className="text-base"
+                  className="text-xs focus:border-[#322219] focus:ring-0"
                   style={{
-                    background: "#e0d6c3",
-                    mixBlendMode: "hard-light",
-                    borderRadius: 10,
-                    border: "1.5px solid #4e342e",
+                    fontSize: "14px",
+                    background: "#f9f6f2",
                     color: "#322219",
-                  }}
-                />
-                <Input
-                  type="text"
-                  name="username"
-                  placeholder="아이디(영문)를 입력하세요"
-                  value={form.username}
-                  onChange={handleChange}
-                  required
-                  autoComplete="username"
-                  className="text-base"
-                  style={{
-                    background: "rgba(245, 239, 230, 0.7)",
-                    borderRadius: 10,
-                    border: "1.5px solid #e0d6c3",
-                    color: "#4e342e",
+                    width: "100%",
                   }}
                 />
                 <Input
@@ -123,12 +129,12 @@ export default function SignupPage() {
                   onChange={handleChange}
                   required
                   autoComplete="off"
-                  className="text-base"
+                  className="text-xs focus:border-[#322219] focus:ring-0"
                   style={{
-                    background: "rgba(245, 239, 230, 0.7)",
-                    borderRadius: 10,
-                    border: "1.5px solid #e0d6c3",
-                    color: "#4e342e",
+                    fontSize: "14px",
+                    background: "#f9f6f2",
+                    color: "#322219",
+                    width: "100%",
                   }}
                 />
                 <Input
@@ -139,20 +145,52 @@ export default function SignupPage() {
                   onChange={handleChange}
                   required
                   autoComplete="new-password"
-                  className="text-base"
+                  className="text-xs focus:border-[#322219] focus:ring-0"
                   style={{
-                    background: "rgba(245, 239, 230, 0.7)",
-                    borderRadius: 10,
-                    border: "1.5px solid #e0d6c3",
-                    color: "#4e342e",
+                    fontSize: "14px",
+                    background: "#f9f6f2",
+                    color: "#322219",
+                    width: "100%",
+                  }}
+                />
+                <Input
+                  type="number"
+                  name="age"
+                  placeholder="나이 (선택)"
+                  value={form.age}
+                  onChange={handleChange}
+                  min={0}
+                  className="text-xs focus:border-[#322219] focus:ring-0"
+                  style={{
+                    fontSize: "14px",
+                    background: "#f9f6f2",
+
+                    color: "#322219",
+                    width: "100%",
+                  }}
+                />
+                <Input
+                  type="number"
+                  name="sex"
+                  placeholder="성별 (0:여, 1:남, 선택)"
+                  value={form.sex}
+                  onChange={handleChange}
+                  min={0}
+                  max={1}
+                  className="text-sm focus:border-[#322219] focus:ring-0"
+                  style={{
+                    fontSize: "14px",
+                    background: "#f9f6f2",
+                    color: "#322219",
+                    width: "100%",
                   }}
                 />
                 <Button
                   type="submit"
                   className="w-full mt-2 bg-[#c7a17a] hover:bg-[#a98467] text-white font-semibold"
                   disabled={
+                    !form.name.trim() ||
                     !form.email.trim() ||
-                    !form.username.trim() ||
                     !form.nickname.trim() ||
                     !form.password.trim()
                   }
@@ -160,6 +198,12 @@ export default function SignupPage() {
                   커피 한 잔 내리기
                 </Button>
               </form>
+              <style jsx global>{`
+                input:focus {
+                  border: 1.5px solid #322219 !important;
+                  outline: none !important;
+                }
+              `}</style>
             </>
           ) : (
             <div className="text-center space-y-6">
@@ -190,7 +234,7 @@ export default function SignupPage() {
           )}
         </CardContent>
       </Card>
-      <style jsx global>{`
+      <style>{`
         @keyframes fade-in {
           from {
             opacity: 0;

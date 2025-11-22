@@ -4,7 +4,14 @@ import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { postChat, ChatSource } from "@/lib/api/apis";
+import {
+  postChat,
+  ChatSource,
+  recommendSeniors,
+  ChatResponse,
+} from "@/lib/api/apis";
+import { toast } from "sonner";
+import Link from "next/link";
 
 const coffeeColors = {
   background: "#f9f6f2",
@@ -14,6 +21,15 @@ const coffeeColors = {
   accent: "#a67c52",
   border: "#e0d6c3",
 };
+
+interface Senior {
+  id: string;
+  name: string;
+  nickname: string;
+  sex?: number;
+  age?: number;
+  email: string;
+}
 
 type Message =
   | {
@@ -28,6 +44,14 @@ type Message =
       sources?: ChatSource[];
     };
 
+type SeniorMessage = {
+  id: number;
+  user: "other";
+  text: string;
+  sources?: ChatSource[];
+  seniors: Senior[];
+};
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, user: "other", text: "안녕하세요! 커피챗에 오신 걸 환영해요 ☕️" },
@@ -35,6 +59,47 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const handleRecommendMentor = async () => {
+    const lastUserMsg = [...messages]
+      .reverse()
+      .find((msg) => msg.user === "me");
+    if (!lastUserMsg) {
+      toast.error("먼저 질문을 입력해 주세요.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 실제 멘토 추천 API 호출
+      const res = await recommendSeniors({ query: lastUserMsg.text });
+      if (res.seniors && res.seniors.length > 0) {
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            id: msgs.length + 1,
+            user: "other",
+            text: "", // text 대신 카드 렌더링용 데이터
+            sources: undefined,
+            seniors: res.seniors, // 커스텀 필드로 멘토 리스트 전달
+          } as any, // 타입 확장
+        ]);
+      } else {
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            id: msgs.length + 1,
+            user: "other",
+            text: `추천 가능한 멘토가 없습니다.`,
+          },
+        ]);
+      }
+    } catch (e) {
+      toast.error("멘토 추천에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -71,8 +136,12 @@ export default function ChatPage() {
     setInput("");
     setLoading(true);
 
-    setTimeout(() => {
-      const res = getDummyResponse(userMsg.text);
+    try {
+      const res: ChatResponse = await postChat({
+        user_id: "de9fed38-311b-4def-ba7e-c9a19064f606",
+        text: userMsg.text,
+      });
+      console.log("Chat response:", res);
       const botMsg: Message = {
         id: userMsg.id + 1,
         user: "other",
@@ -80,8 +149,18 @@ export default function ChatPage() {
         sources: res.sources,
       };
       setMessages((msgs) => [...msgs, botMsg]);
+    } catch (e) {
+      setMessages((msgs) => [
+        ...msgs,
+        {
+          id: userMsg.id + 1,
+          user: "other",
+          text: "답변을 가져오지 못했습니다. 다시 시도해 주세요.",
+        },
+      ]);
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -121,30 +200,105 @@ export default function ChatPage() {
                   }}
                 >
                   <CardContent className="py-3 px-5 text-base break-words">
-                    {msg.text}
-                    {msg.user === "other" &&
-                      msg.sources &&
-                      msg.sources.length > 0 && (
-                        <div className="mt-3 bg-[#f5efe6] rounded-lg p-3 text-xs text-[#7c5c3e] border border-[#e0d6c3]">
-                          <div className="font-semibold mb-1">
-                            🔗 답변에 참고된 프로필
-                          </div>
-                          <ul className="pl-3">
-                            {msg.sources.map((src, idx) => (
-                              <li key={idx} className="mb-1">
-                                <span className="font-medium">
-                                  프로필ID: {src.profile_id}
-                                </span>
-                                <span className="ml-2 text-[11px]">
-                                  (유저: {src.user_id}, 관련도:{" "}
-                                  {src.relevance_score}, 다양성:{" "}
-                                  {src.temperature})
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                    {/* 멘토 추천 메시지라면 카드로 멘토 리스트 렌더링 */}
+                    {msg.user === "other" && (msg as any).seniors ? (
+                      <div className="flex flex-col gap-3">
+                        {(msg as SeniorMessage).seniors.map(
+                          (s: Senior, i: number) => (
+                            <div
+                              key={s.id}
+                              className="flex items-center justify-between bg-[#f7efe2] border border-[#e0d6c3] rounded-lg px-4 py-3"
+                            >
+                              <div>
+                                <div className="font-semibold text-[#a67c52]">
+                                  {s.name}{" "}
+                                  <span className="text-xs text-gray-500">
+                                    (@{s.nickname})
+                                  </span>
+                                </div>
+                                <div className="text-xs text-gray-600">
+                                  {typeof s.sex === "number"
+                                    ? s.sex === 0
+                                      ? "여자"
+                                      : "남자"
+                                    : ""}
+                                  {s.age ? ` · ${s.age}세` : ""}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {s.email}
+                                </div>
+                              </div>
+                              <Link
+                                href={`/profile/${s.id}`}
+                                className="ml-4 px-3 py-1 bg-[#c7a17a] text-white rounded-md text-xs font-semibold hover:bg-[#a98467] transition"
+                              >
+                                프로필 보기
+                              </Link>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    ) : (
+                      <>
+                        {msg.text}
+                        {msg.user === "other" &&
+                          msg.sources &&
+                          msg.sources.length > 0 && (
+                            <div className="mt-3 bg-[#f5efe6] rounded-lg p-3 text-xs text-[#7c5c3e] border border-[#e0d6c3]">
+                              <div className="font-semibold mb-1">
+                                🔗 답변에 참고된 프로필
+                              </div>
+                              <ul className="pl-3">
+                                {msg.sources.map((src, idx) => (
+                                  <li key={idx} className="mb-2">
+                                    <div className="ml-2 text-xs text-gray-700">
+                                      <span className="font-semibold">
+                                        이름:
+                                      </span>{" "}
+                                      {src.user_data.name}{" "}
+                                      <span className="text-gray-500">
+                                        (@{src.user_data.nickname})
+                                      </span>
+                                      {typeof src.user_data.sex ===
+                                        "number" && (
+                                        <span className="ml-2">
+                                          /{" "}
+                                          {src.user_data.sex === 0
+                                            ? "여자"
+                                            : src.user_data.sex === 1
+                                            ? "남자"
+                                            : "기타"}
+                                        </span>
+                                      )}
+                                      {src.user_data.age && (
+                                        <span className="ml-2">
+                                          {src.user_data.age}세
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="ml-2 text-xs text-gray-500">
+                                      <span className="font-semibold">
+                                        이메일:
+                                      </span>{" "}
+                                      {src.user_data.email}
+                                    </div>
+                                    <div className="ml-2 text-xs text-gray-500">
+                                      <span className="font-semibold">
+                                        관련도:
+                                      </span>{" "}
+                                      {src.relevance_score} /{" "}
+                                      <span className="font-semibold">
+                                        다양성:
+                                      </span>{" "}
+                                      {src.temperature}
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                      </>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -170,6 +324,17 @@ export default function ChatPage() {
             </div>
           )}
           <div ref={chatEndRef} />
+        </div>
+        {/* 멘토 추천 버튼 */}
+        <div className="w-full px-6 pb-2 flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            className="border-[#c7a17a] text-[#a67c52] font-semibold rounded-lg shadow-none hover:bg-[#f7efe2] transition"
+            onClick={handleRecommendMentor}
+          >
+            멘토 추천받기
+          </Button>
         </div>
         {/* 입력창 고정 */}
         <div className="w-full border-t border-gray-200 bg-[#f9f6f2] rounded-b-2xl px-6 py-4 flex items-center gap-3 flex-shrink-0">

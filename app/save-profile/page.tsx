@@ -3,11 +3,12 @@
 import React, { useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useSearchParams } from "next/navigation";
 import { createProfile } from "@/lib/api/apis";
 import { useEffect } from "react";
+import { toast } from "sonner";
 
 type ProfileEssayQuestion = {
   key: string;
@@ -156,6 +157,7 @@ export default function ProfilePage() {
         profile_data: answers,
       });
       setSubmitResult("success");
+      toast.success("프로필이 성공적으로 저장되었습니다!");
     } catch (e) {
       setSubmitResult("fail");
     } finally {
@@ -174,11 +176,20 @@ export default function ProfilePage() {
 
   return (
     <div
-      className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#f9f6f2] to-[#f7efe2]"
-      style={{ minHeight: "calc(100vh - 64px)" }}
+      className="flex items-center justify-center bg-gradient-to-br from-[#f9f6f2] to-[#f7efe2]"
+      style={{
+        minHeight: "calc(100vh - 64px)",
+        backgroundImage:
+          "url('/beige-paper.png'), linear-gradient(to bottom right, #f9f6f2, #f7efe2)",
+        backgroundRepeat: "repeat",
+        backgroundSize: "auto",
+      }}
     >
-      <div className="w-full max-w-xl flex flex-col rounded-2xl shadow-lg border border-gray-200 bg-white">
-        <CardContent className="py-10 flex flex-col gap-8">
+      <Card
+        className="w-[370px] shadow-none animate-fade-in "
+        style={{ background: "transparent" }}
+      >
+        <CardContent className="py-10 flex flex-col gap-7">
           {!submitResult ? (
             !status ? (
               <>
@@ -204,7 +215,7 @@ export default function ProfilePage() {
               </>
             ) : !infoDone ? (
               <>
-                <div className="text-xl font-bold text-center text-brown-700 mb-2">
+                <div className="text-xl font-bold text-center text-[#322219] whitespace-nowrap">
                   기본 정보를 입력해 주세요
                 </div>
                 <form
@@ -240,7 +251,7 @@ export default function ProfilePage() {
                       placeholder="학년을 입력해 주세요. (예: 4)"
                       value={form.grade}
                       onChange={handleFormChange}
-                      className="bg-[#f9f6f2] border border-gray-200 rounded-lg text-base"
+                      className="bg-[#f9f6f2] border border-gray-200 rounded-lg text-base "
                       required
                     />
                   )}
@@ -375,11 +386,7 @@ export default function ProfilePage() {
                     </span>
                   </div>
                 </>
-              ) : submitResult === "fail" ? (
-                <div className="text-red-500 font-bold">
-                  프로필 저장에 실패했습니다. 다시 시도해 주세요.
-                </div>
-              ) : (
+              ) : submitResult === "fail" ? null : (
                 <div className="text-base text-brown-700">
                   프로필 저장 중...
                 </div>
@@ -387,7 +394,7 @@ export default function ProfilePage() {
             </div>
           )}
         </CardContent>
-      </div>
+      </Card>
       <style jsx global>{`
         @keyframes fade-in {
           from {

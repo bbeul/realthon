@@ -19,33 +19,7 @@ export default function Page({ params }: Props) {
     async function fetchProfile() {
       try {
         // const data = await getProfile(uuid);
-        const data = {
-          id: uuid,
-          user: {
-            name: "홍길동",
-            nickname: "coffee_mentor",
-            email: "mentor@example.com",
-            age: 28,
-            sex: 1,
-          },
-          univ: "서울대학교",
-          major: "컴퓨터공학",
-          grade: "4",
-          gpa: "4.1/4.5",
-          company: "카카오",
-          job: "데이터 엔지니어",
-          ref_score: 0.92,
-          career_year: 3,
-          profile_data: {
-            취업과정: "카카오 인턴 후 정규직 전환",
-            포트폴리오: "https://github.com/mentor/portfolio",
-            자기소개: "데이터 분석과 AI에 관심이 많아요.",
-            진로계획: "AI 엔지니어로 성장",
-            취미: "커피 내리기, 러닝",
-          },
-          profile_tags: ["AI", "데이터", "멘토링", "커피"],
-          created_at: "2024-01-01",
-        };
+        const data = await getProfile(uuid); // TODO: 실제 API 연동
         setProfile(data);
       } catch (e) {
         setProfile(null);
