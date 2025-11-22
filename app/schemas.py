@@ -3,7 +3,7 @@ from typing import Optional
 
 class UserCreate(BaseModel):
     name: str
-    nickname: constr(min_length=2, max_length=15, regex="^[a-zA-Z0-9가-힣]+$")
+    nickname: constr(min_length=2, max_length=15)
     email: EmailStr
     password: constr(min_length=8)
     age: Optional[int]
@@ -11,7 +11,7 @@ class UserCreate(BaseModel):
 
 class UserUpdate(BaseModel):
     name: Optional[str]
-    nickname: Optional[constr(min_length=2, max_length=15, regex="^[a-zA-Z0-9가-힣]+$")]
+    nickname: Optional[constr(min_length=2, max_length=15)]
     email: Optional[EmailStr]
     password: Optional[constr(min_length=8)]
     age: Optional[int]

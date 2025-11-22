@@ -4,13 +4,14 @@ from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 
-env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
-if os.path.exists(env_path):
-    load_dotenv(env_path)
+env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+load_dotenv(env_path)
 
-DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql+asyncpg://user:password@localhost/dbname')
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_async_engine(DATABASE_URL, echo=True)
-AsyncSessionLocal = sessionmaker(
-    bind=engine, class_=AsyncSession, expire_on_commit=False
-)
+AsyncSessionLocal = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session

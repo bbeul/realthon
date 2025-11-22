@@ -1,4 +1,4 @@
-import asyncio
+""" import asyncio
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Dict, Any, Optional
@@ -121,7 +121,7 @@ class ProfileEmbeddingService:
         async with AsyncSessionLocal() as session:
             try:
                 await session.execute(
-                    text("""
+                    text(
                         INSERT INTO profile (
                             id, user_id, univ, major, grade, gpa, company, job,
                             ref_score, career_year, profile_data, profile_tags,
@@ -131,7 +131,7 @@ class ProfileEmbeddingService:
                             :ref_score, :career_year, :profile_data, :profile_tags,
                             :created_at, :updated_at
                         )
-                    """),
+                    ),
                     {
                         "id": str(profile.id),
                         "user_id": str(profile.user_id),
@@ -164,13 +164,13 @@ class ProfileEmbeddingService:
                     # embedding 리스트를 쉼표로 join하여 문자열로 변환
                     embedding_str = "[" + ",".join(str(x) for x in embedding) + "]"
                     await session.execute(
-                        text("""
+                        text(
                             INSERT INTO profile_chunks (
                                 profile_id, user_id, chunk_text, embedding, created_at
                             ) VALUES (
                                 :profile_id, :user_id, :chunk_text, :embedding, :created_at
                             )
-                        """),
+                        ),
                         {
                             "profile_id": str(profile_id),
                             "user_id": str(user_id),
@@ -206,4 +206,4 @@ class ProfileEmbeddingService:
         return {
             "profile_id": profile.id,
             "chunk_count": len(chunks_embeddings)
-        }
+        } """

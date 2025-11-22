@@ -7,7 +7,7 @@ from datetime import datetime
 Base = declarative_base()
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "user"
 
     id = sa.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     password = sa.Column(sa.String, nullable=False)
