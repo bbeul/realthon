@@ -28,7 +28,7 @@ class ProfileEmbeddingService:
     def _get_model(self):
         with self._model_lock:
             if self._model is None:
-                self._model = SentenceTransformer("nlpai-lab/KURE-v1")
+                self._model = SentenceTransformer("dragonkue/multilingual-e5-small-ko")
             return self._model
 
     # -----------------------------
