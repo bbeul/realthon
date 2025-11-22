@@ -1,7 +1,11 @@
 from pydantic import BaseModel, EmailStr, constr
-from typing import Optional, List
+from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
+
+from pydantic import BaseModel
+from typing_extensions import Literal
+
 
 # ----------------- User -----------------
 class UserCreate(BaseModel):
@@ -19,3 +23,52 @@ class UserUpdate(BaseModel):
     password: Optional[constr(min_length=8)]
     age: Optional[int]
     sex: Optional[int]
+
+class SourceInput(BaseModel):
+    profile_id: str
+    user_id: str
+    relevance_score: float
+
+
+class SourceOutput(SourceInput):
+    pass
+
+
+class QuestionCreate(BaseModel):
+    user_id: UUID
+    text: str
+    #tags: Optional[List[str]] = None
+
+
+class QuestionRead(BaseModel):
+    id: UUID
+    user_id: UUID
+    text: str
+    #tags: Optional[List[str]]
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class AnswerCreate(BaseModel):
+    query_id: UUID
+    text: str
+    sources: List[SourceInput]
+
+
+class ResponseRead(BaseModel):
+    id: UUID
+    query_id: UUID
+    text: str
+    sources: Optional[List[SourceOutput]]=None
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class MessagesRead(BaseModel):
+    query: QuestionRead
+    responses: List[ResponseRead]
