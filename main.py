@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.root import router as root_router
 from app.controller.UserController import router as user_router
 from app.embedding.rag_embedding import router as embedding_router
-
+from app.recommend.router import router as recommend_router
 app = FastAPI()
 
 app.add_middleware(
@@ -16,3 +16,4 @@ app.add_middleware(
 app.include_router(root_router)
 app.include_router(user_router)
 app.include_router(embedding_router)
+app.include_router(recommend_router)
