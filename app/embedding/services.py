@@ -1,0 +1,207 @@
+import asyncio
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from typing import List, Dict, Any, Optional
+from app.db import AsyncSessionLocal
+from sqlalchemy import text
+from datetime import datetime
+from fastapi import HTTPException
+from sentence_transformers import SentenceTransformer
+from kiwipiepy import Kiwi
+import json
+from zoneinfo import ZoneInfo
+
+class ProfileEmbeddingService:
+    _model: Optional[SentenceTransformer] = None
+    _model_lock = threading.Lock()
+    _executor = ThreadPoolExecutor(max_workers=4)
+    _encode_lock = threading.Lock()
+
+    def __init__(self):
+        self.kiwi = Kiwi()
+        self.model = self._get_model()
+
+    # -----------------------------
+    # Lazy model loader (thread-safe)
+    # -----------------------------
+    def _get_model(self):
+        with self._model_lock:
+            if self._model is None:
+                self._model = SentenceTransformer("nlpai-lab/KURE-v1")
+            return self._model
+
+    # -----------------------------
+    # Sentence Split
+    # -----------------------------
+    def split_sentences(self, text: str) -> List[str]:
+        return [s.text.strip() for s in self.kiwi.split_into_sents(text) if s.text.strip()]
+
+    # -----------------------------
+    # Chunk Builder
+    # -----------------------------
+    def build_chunks(self, sentences: List[str], min_size=200, max_size=1500) -> List[str]:
+        chunks = []
+        current = ""
+
+        for s in sentences:
+            if len(current) + len(s) <= max_size:
+                current += " " + s
+            else:
+                if current.strip():
+                    chunks.append(current.strip())
+                current = s
+
+        if current.strip():
+            chunks.append(current.strip())
+
+        # merge short chunks
+        merged = []
+        for c in chunks:
+            if merged and len(c) < min_size:
+                merged[-1] = (merged[-1] + " " + c).strip()
+            else:
+                merged.append(c)
+
+        return merged
+
+    # -----------------------------
+    # Chunk Text
+    # -----------------------------
+    def chunk_text(self, text: str) -> List[str]:
+        if not text or not text.strip():
+            return []
+
+        paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+        results = []
+
+        for p in paragraphs:
+            if len(p) > 1500:
+                sents = self.split_sentences(p)
+                results.extend(self.build_chunks(sents))
+            else:
+                results.append(p)
+
+        return results
+
+    # -----------------------------
+    # Async Embedding
+    # -----------------------------
+    async def embed_text(self, text: str) -> List[float]:
+        loop = asyncio.get_event_loop()
+
+        def encode_with_lock():
+            with self._encode_lock:
+                return self.model.encode(text, convert_to_numpy=True)
+
+        emb = await loop.run_in_executor(
+            self._executor,
+            encode_with_lock
+        )
+
+        return emb.tolist()
+
+    # -----------------------------
+    # Main Pipeline: chunk + embed
+    # -----------------------------
+    async def process_profile(self, profile):
+        profile_data_str = "\n\n".join(
+            f"[{k}]\n{v}" for k, v in (profile.profile_data or {}).items()
+        )
+
+        chunks = self.chunk_text(profile_data_str)
+
+        embeddings = await asyncio.gather(
+            *(self.embed_text(chunk) for chunk in chunks)
+        )
+
+        return list(zip(chunks, embeddings))
+
+
+    async def save_profile(self, profile):
+        async with AsyncSessionLocal() as session:
+            try:
+                await session.execute(
+                    text("""
+                        INSERT INTO profile (
+                            id, user_id, univ, major, grade, gpa, company, job,
+                            ref_score, career_year, profile_data, profile_tags,
+                            created_at, updated_at
+                        ) VALUES (
+                            :id, :user_id, :univ, :major, :grade, :gpa, :company, :job,
+                            :ref_score, :career_year, :profile_data, :profile_tags,
+                            :created_at, :updated_at
+                        )
+                    """),
+                    {
+                        "id": str(profile.id),
+                        "user_id": str(profile.user_id),
+                        "univ": profile.univ,
+                        "major": profile.major,
+                        "grade": profile.grade,
+                        "gpa": profile.gpa,
+                        "company": profile.company,
+                        "job": profile.job,
+                        "ref_score": profile.ref_score,
+                        "career_year": profile.career_year,
+                        "profile_data": json.dumps(profile.profile_data),  # 직렬화
+                        "profile_tags": profile.profile_tags,    # 직렬화
+                        "created_at": datetime.now(ZoneInfo("Asia/Seoul")).replace(tzinfo=None),
+                        "updated_at": datetime.now(ZoneInfo("Asia/Seoul")).replace(tzinfo=None)
+                    }
+                )
+                await session.commit()
+            except Exception as e:
+                await session.rollback()
+                raise HTTPException(status_code=500, detail=str(e))
+
+    # -----------------------------
+    # INSERT chunk + embedding → profile_chunks 테이블
+    # -----------------------------
+    async def save_profile_chunks(self, profile_id, user_id, chunks_embeddings):
+        async with AsyncSessionLocal() as session:
+            try:
+                for chunk, embedding in chunks_embeddings:
+                    await session.execute(
+                        text("""
+                            INSERT INTO profile_chunks (
+                                profile_id, user_id, chunk_text, embedding, created_at
+                            ) VALUES (
+                                :profile_id, :user_id, :chunk_text, :embedding, :created_at
+                            )
+                        """),
+                        {
+                            "profile_id": str(profile_id),
+                            "user_id": str(user_id),
+                            "chunk_text": chunk,
+                            "embedding": embedding,
+                            "created_at": datetime.utcnow(),
+                        }
+                    )
+
+                await session.commit()
+
+            except Exception as e:
+                await session.rollback()
+                raise HTTPException(status_code=500, detail=str(e))
+
+    # -----------------------------
+    # 전체 파이프라인 (API에서 호출)
+    # -----------------------------
+    async def process_and_save(self, profile):
+        # 1) chunk + embedding
+        chunks_embeddings = await self.process_profile(profile)
+
+        # 2) 기본 profile 정보 저장
+        await self.save_profile(profile)
+
+        # 3) chunk 데이터 저장
+        await self.save_profile_chunks(
+            profile_id=profile.id,
+            user_id=profile.user_id,
+            chunks_embeddings=chunks_embeddings
+        )
+
+        return {
+            "profile_id": profile.id,
+            "chunk_count": len(chunks_embeddings)
+        }

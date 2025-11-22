@@ -7,4 +7,5 @@ python-dotenv
 supabase
 openai
 pgvector
-
+sentence-transformers
+kiwipiepy
