@@ -25,16 +25,16 @@ class UserRepository:
 
     # ------------------ READ ------------------
     async def get_by_email(self, email: str):
-        result = await self.session.execute(select(User).filter_by(email=email))
-        return result.scalar()
+        result = await self.session.execute(select(User).where(User.email == email))
+        return result.scalar_one_or_none()  # 없으면 None, 하나 이상이면 예외
 
     async def get_by_nickname(self, nickname: str):
-        result = await self.session.execute(select(User).filter_by(nickname=nickname))
-        return result.scalar()
+        result = await self.session.execute(select(User).where(User.nickname == nickname))
+        return result.scalar_one_or_none()
 
-    async def get_by_id(self, user_id: str):
-        result = await self.session.execute(select(User).filter_by(id=user_id))
-        return result.scalar()
+    async def get_by_id(self, user_id: int):
+        result = await self.session.execute(select(User).where(User.id == user_id))
+        return result.scalar_one_or_none()
 
     async def list_all(self):
         result = await self.session.execute(select(User))
