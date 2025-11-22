@@ -1,4 +1,4 @@
-""" import asyncio
+import asyncio
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Dict, Any, Optional
@@ -10,6 +10,7 @@ from sentence_transformers import SentenceTransformer
 from kiwipiepy import Kiwi
 import json
 from zoneinfo import ZoneInfo
+from app.embedding.models import ProfileRead, UserRead
 
 class ProfileEmbeddingService:
     _model: Optional[SentenceTransformer] = None
@@ -121,7 +122,7 @@ class ProfileEmbeddingService:
         async with AsyncSessionLocal() as session:
             try:
                 await session.execute(
-                    text(
+                    text("""
                         INSERT INTO profile (
                             id, user_id, univ, major, grade, gpa, company, job,
                             ref_score, career_year, profile_data, profile_tags,
@@ -131,7 +132,7 @@ class ProfileEmbeddingService:
                             :ref_score, :career_year, :profile_data, :profile_tags,
                             :created_at, :updated_at
                         )
-                    ),
+                    """),
                     {
                         "id": str(profile.id),
                         "user_id": str(profile.user_id),
@@ -164,13 +165,13 @@ class ProfileEmbeddingService:
                     # embedding 리스트를 쉼표로 join하여 문자열로 변환
                     embedding_str = "[" + ",".join(str(x) for x in embedding) + "]"
                     await session.execute(
-                        text(
+                        text("""
                             INSERT INTO profile_chunks (
                                 profile_id, user_id, chunk_text, embedding, created_at
                             ) VALUES (
                                 :profile_id, :user_id, :chunk_text, :embedding, :created_at
                             )
-                        ),
+                        """),
                         {
                             "profile_id": str(profile_id),
                             "user_id": str(user_id),
@@ -206,4 +207,70 @@ class ProfileEmbeddingService:
         return {
             "profile_id": profile.id,
             "chunk_count": len(chunks_embeddings)
-        } """
+        }
+
+    async def get_all_profiles(self) -> List[ProfileRead]:
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(
+                text("SELECT * FROM profile")
+            )
+            rows = result.fetchall()
+            profiles = []
+            for row in rows:
+                profile = ProfileRead(
+                    id=row.id,
+                    user_id=row.user_id,
+                    univ=row.univ,
+                    major=row.major,
+                    grade=row.grade,
+                    gpa=row.gpa,
+                    company=row.company,
+                    job=row.job,
+                    ref_score=row.ref_score,
+                    career_year=row.career_year,
+                    profile_data=row.profile_data or {},
+                    profile_tags=row.profile_tags or [],
+                    created_at=row.created_at,
+                    updated_at=row.updated_at
+                )
+                profiles.append(profile)
+            return profiles
+
+
+    async def get_profile_by_user_id(self, user_id: str) -> Optional[ProfileRead]:
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(
+                text("""SELECT p.*, u.name as user_name, u.nickname as user_nickname,
+                       u.email as user_email, u.age as user_age, u.sex as user_sex
+                FROM profile p
+                JOIN "user" u ON p.user_id = u.id
+                WHERE p.user_id = :user_id """),
+                {"user_id": user_id}
+            )
+            row = result.fetchone()
+            if not row:
+                return None
+
+            profile = ProfileRead(
+                id=row.id,
+                user=UserRead(id=row.user_id,
+                    name=row.user_name,
+                    nickname=row.user_nickname,
+                    email=row.user_email,
+                    age=row.user_age,
+                    sex=row.user_sex
+                ),
+                univ=row.univ,
+                major=row.major,
+                grade=row.grade,
+                gpa=row.gpa,
+                company=row.company,
+                job=row.job,
+                ref_score=row.ref_score,
+                career_year=row.career_year,
+                profile_data=row.profile_data or {},
+                profile_tags=row.profile_tags or [],
+                created_at=row.created_at,
+                updated_at=row.updated_at
+            )
+            return profile
