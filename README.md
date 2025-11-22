@@ -6,6 +6,8 @@
 
 🔗 **서비스 링크**: LatteChat Link
 
+**시연**: https://youtu.be/wNHHBQHtXzk
+
 ---
 
 ## 🧩 문제 정의
