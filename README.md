@@ -4,9 +4,10 @@
   <img src="coursefitImage" alt="Coursefit Logo" width="200"/>
 </p>
 
-🔗 **서비스 링크**: LatteChat Link
+🔗 **서비스 링크**:  https://unspitted-tomblike-annamaria.ngrok-free.dev -> http://localhost
 
 **시연**: https://youtu.be/wNHHBQHtXzk
+
 
 ---
 
