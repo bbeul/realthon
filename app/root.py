@@ -1,5 +1,8 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
+
+from app.db import AsyncSessionLocal
 
 router = APIRouter()
 
@@ -10,6 +13,5 @@ def root():
 @router.get("/health")
 def health_check():
     return JSONResponse(content={"status": "ok"})
-
 
 
