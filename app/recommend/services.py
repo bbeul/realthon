@@ -6,7 +6,7 @@ from app.db import AsyncSessionLocal, DATABASE_URL, get_db
 from openai import OpenAI
 from app.embedding.services import ProfileEmbeddingService # 임베딩 함수 사용
 
-OPENAI_API_KEY = __import__("os").getenv("OPENAI_API_KEY", "")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 class ChatBotService:
