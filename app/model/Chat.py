@@ -25,7 +25,7 @@ class Query(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("user.id"), nullable=False)
 
     text = Column(String, nullable=False)
-    tags = Column(JSONB, nullable=True)  # 예: ["취업", "포트폴리오"]
+    #tags = Column(JSONB, nullable=True)  # 예: ["취업", "포트폴리오"]
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(

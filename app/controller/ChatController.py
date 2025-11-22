@@ -2,6 +2,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from app.chatbot.services import ChatBotService
+from uuid import UUID
 
 from app.db import get_db
 from app.model.Chat import Query, Response
@@ -15,7 +17,7 @@ from app.schemas import (
 )
 
 router = APIRouter(prefix="/chat", tags=["chat"])
-
+chatbot_service = ChatBotService()
 
 
 # ------------------ CREATE ------------------
@@ -28,56 +30,49 @@ async def create_question(
 ):
     query = Query(
         user_id=payload.user_id,
-        text=payload.text,
-        tags=payload.tags
+        text=payload.text
     )
     session.add(query)
     await session.commit()
     await session.refresh(query)
-    return query
+
+    query_id = query.id
+    question_text = query.text
+
+    answer = await chatbot_service.run_pipeline(query_id,question_text)
+    return {"answer": answer}
 
 
 # 2) 답변 생성: POST /chat/answers
 @router.post("/answers", response_model=ResponseRead)
 async def create_answer(
+    # query_id: UUID,
     payload: AnswerCreate,
     session: AsyncSession = Depends(get_db),
 ):
     # 관련 query 존재 여부 체크
-    result = await session.execute(
-        select(Query).where(Query.id == payload.query_id)
-    )
+    # result = await session.execute(
+    #     select(Query).where(Query.id == payload.query_id)
+    # )
+
     query = result.scalar_one_or_none()
     if query is None:
         raise HTTPException(status_code=404, detail="Query not found")
 
-    sources_json = [
-        {
-            "profile_id": src.profile_id,
-            "user_id": src.user_id,
-            "relevance_score": src.relevance_score,
-        }
-        for src in payload.sources
-    ]
-
+    # 2) Response 저장 (sources는 안 씀 → 기본값 NULL)
     response = Response(
         query_id=payload.query_id,
-        text=payload.text,
-        sources=sources_json,
+        text=payload.text
     )
     session.add(response)
     await session.commit()
     await session.refresh(response)
 
-    sources_out = [
-        SourceOutput(**src_dict) for src_dict in (response.sources or [])
-    ]
-
+    # 3) 원하는 형태로 응답
     return ResponseRead(
-        id=response.id,
-        query_id=response.query_id,
+        id=str(response.id),
+        query_id=str(response.query_id),
         text=response.text,
-        sources=sources_out,
         created_at=response.created_at,
     )
 

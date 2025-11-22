@@ -24,8 +24,6 @@ class UserUpdate(BaseModel):
     age: Optional[int]
     sex: Optional[int]
 
-UrgencyLiteral = Literal["low", "medium", "high"]
-
 class SourceInput(BaseModel):
     profile_id: str
     user_id: str
@@ -39,18 +37,14 @@ class SourceOutput(SourceInput):
 class QuestionCreate(BaseModel):
     user_id: UUID
     text: str
-    tags: Optional[List[str]] = None
-    urgency: Optional[UrgencyLiteral] = None
-    intent: Optional[str] = None  # 없으면 LLM 결과로 채워도 됨
+    #tags: Optional[List[str]] = None
 
 
 class QuestionRead(BaseModel):
     id: UUID
     user_id: UUID
     text: str
-    tags: Optional[List[str]]
-    urgency: Optional[UrgencyLiteral]
-    intent: Optional[str]
+    #tags: Optional[List[str]]
     created_at: datetime
     updated_at: datetime
 
@@ -68,7 +62,7 @@ class ResponseRead(BaseModel):
     id: UUID
     query_id: UUID
     text: str
-    sources: Optional[List[SourceOutput]]
+    sources: Optional[List[SourceOutput]]=None
     created_at: datetime
 
     class Config:
