@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ☕️ Latte Chat — 나에게 딱 맞는 커리어 가이드 챗봇
 
-## Getting Started
+<p align="center">
+  <img src="coursefitImage" alt="Coursefit Logo" width="200"/>
+</p>
 
-First, run the development server:
+🔗 **서비스 링크**: LatteChat Link
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🧩 문제 정의
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+대학생·취준생은 전공·진로 선택 과정에서 다음의 어려움을 겪습니다:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+❌ 학교·학과마다 정보가 분산되어 있어 검색으로는 “내 케이스”에 맞는 답을 얻기 어려움
 
-## Learn More
+❌ 선배들의 실제 경험(수업·프로젝트·대외활동·인턴)이 데이터화되지 않아 반복적으로 같은 시행착오 발생
 
-To learn more about Next.js, take a look at the following resources:
+❌ 멘토 연결 장벽이 높아 가벼운 질문조차 부담스러움
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+👉 필요한 정보도, 조언도, 멘토도 존재하지만 서로 연결되지 않아 원하는 답을 얻기까지 **많은 시간과 노력이 소모**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 💡 해결 방법 — Latte Chat
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**선배들의 경험·지식·노하우를 데이터화해, 자연어로 상담할 수 있는 AI 기반 멘토링 플랫폼**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> “질문을 입력하면, 수많은 선배들의 실제 경험을 기반으로 한 맞춤형 답변을 AI가 제공하고, 필요 시 실제 멘토와 연결됩니다.”
+
+---
+
+## 🪄 주요 기능
+
+| 기능 | 설명 |
+|------|------|
+| 📄 AI 멘토링 챗봇 | 대학·전공 선택과 진로 고민을 겪는 학생들에게 신뢰도 높은 상담을 제공 |
+| ✔️ 맞춤 멘토 매칭 | 내 케이스에 맞는 멘토가 있다면 1대1 질의응답 창구 제공 |
+
+---
+
+## 🔥 서비스 화면 (Demo)
+
+> 시연 GIF / 주요 화면 스크린샷 삽입 공간
+> 
+
+---
+
+## 🎯 차별점
+
+| 기존 멘토링 방식 | Latte Chat |
+|----------------------|-----------|
+| 익명 커뮤니티 / 경험담 검색 | 선배 경험 데이터화 + 지식 네트워크 |
+| 멘토 연결이 부담스럽고 비효율적 | 자연어로 먼저 AI 상담, 필요 시 실제 멘토 연결 |
+| 정보가 개인 경험 수준에 머무름 | 축적될수록 성장하는 **자가 학습 멘토 네트워크** |
+| 단편적 Q&A | 전공·수업·진로 로드맵까지 **커리어 맞춤 추천** |
+
+---
+
+## 👩‍💻 기술 스택
+
+| Category | Stack |
+|---------|-------|
+| Frontend | React.js |
+| Backend | Python, FastAPI |
+| AI / LLM | GPT-mini-4 |
+| Database | Supabase |
+
+---
