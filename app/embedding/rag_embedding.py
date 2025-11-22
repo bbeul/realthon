@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request
-from uuid import UUID
+from uuid import UUID, uuid4
 from typing import List
 
 from app.embedding.models import ProfileCreate, ProfileRead
