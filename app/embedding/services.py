@@ -161,6 +161,8 @@ class ProfileEmbeddingService:
         async with AsyncSessionLocal() as session:
             try:
                 for chunk, embedding in chunks_embeddings:
+                    # embedding 리스트를 쉼표로 join하여 문자열로 변환
+                    embedding_str = "[" + ",".join(str(x) for x in embedding) + "]"
                     await session.execute(
                         text("""
                             INSERT INTO profile_chunks (
@@ -173,7 +175,7 @@ class ProfileEmbeddingService:
                             "profile_id": str(profile_id),
                             "user_id": str(user_id),
                             "chunk_text": chunk,
-                            "embedding": embedding,
+                            "embedding": embedding_str,
                             "created_at": datetime.utcnow(),
                         }
                     )

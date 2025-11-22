@@ -3,7 +3,7 @@ from typing import Optional, List, Dict, Any
 from uuid import UUID
 
 class ProfileCreate(BaseModel):
-    id: UUID
+    id: UUID = None
     user_id: UUID
     univ: str
     major: str
