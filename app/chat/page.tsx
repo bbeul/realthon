@@ -12,6 +12,7 @@ import {
 } from "@/lib/api/apis";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const coffeeColors = {
   background: "#f9f6f2",
@@ -52,6 +53,15 @@ type SeniorMessage = {
   seniors: Senior[];
 };
 
+const personaList = [
+  { key: "default", label: "기본" },
+  { key: "친절한", label: "친절한" },
+  { key: "직설적인", label: "직설적인" },
+  { key: "냉정한", label: "냉정한" },
+  { key: "밝은", label: "밝은" },
+  { key: "멘토다운", label: "멘토다운" },
+];
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, user: "other", text: "안녕하세요! 커피챗에 오신 걸 환영해요 ☕️" },
@@ -59,6 +69,8 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [persona, setPersona] = useState<string>("default");
+  const router = useRouter();
 
   const handleRecommendMentor = async () => {
     const lastUserMsg = [...messages]
@@ -105,26 +117,6 @@ export default function ChatPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const getDummyResponse = (query: string) => {
-    return {
-      text: `질문 "${query}"에 대한 더미 답변입니다.`,
-      sources: [
-        {
-          profile_id: "uuid-1234",
-          user_id: "uuid-mentor-1",
-          relevance_score: 0.87,
-          temperature: 0.92,
-        },
-        {
-          profile_id: "uuid-5678",
-          user_id: "uuid-mentor-2",
-          relevance_score: 0.75,
-          temperature: 0.68,
-        },
-      ],
-    };
-  };
-
   const handleSend = async () => {
     if (!input.trim() || loading) return;
     const userMsg: Message = {
@@ -140,6 +132,7 @@ export default function ChatPage() {
       const res: ChatResponse = await postChat({
         user_id: "de9fed38-311b-4def-ba7e-c9a19064f606",
         text: userMsg.text,
+        persona: persona,
       });
       console.log("Chat response:", res);
       const botMsg: Message = {
@@ -169,13 +162,35 @@ export default function ChatPage() {
 
   return (
     <div
-      className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#f9f6f2] to-[#f7efe2]"
-      style={{ minHeight: "calc(100vh - 64px)" }}
+      className="flex items-center justify-center bg-gradient-to-br from-[#f9f6f2] to-[#f7efe2]"
+      style={{
+        minHeight: "calc(100vh - 64px)",
+        backgroundImage:
+          "url('/beige-paper.png'), linear-gradient(to bottom right, #f9f6f2, #f7efe2)",
+        backgroundRepeat: "repeat",
+        backgroundSize: "auto",
+      }}
     >
       <div
         className="w-full max-w-xl flex flex-col rounded-2xl shadow-lg border border-gray-200 bg-white"
         style={{ minHeight: 600, height: "80vh" }}
       >
+        <div className="w-full px-6 pt-2 pb-2 flex gap-2">
+          {personaList.map((p) => (
+            <Button
+              key={p.key}
+              type="button"
+              className={`px-3 py-1 rounded-md text-xs font-semibold border transition ${
+                persona === p.key
+                  ? "bg-[#c7a17a] text-white border-[#c7a17a]"
+                  : "bg-[#f9f6f2] text-[#a67c52] border-[#e0d6c3]"
+              }`}
+              onClick={() => setPersona(p.key)}
+            >
+              {p.label}
+            </Button>
+          ))}
+        </div>
         <div
           className="flex-1 overflow-y-auto px-6 py-8"
           style={{ minHeight: 400 }}
@@ -189,7 +204,7 @@ export default function ChatPage() {
             >
               <div className="flex items-end gap-2 max-w-[80%]">
                 <Card
-                  className={`shadow-none border-0 ${
+                  className={`shadow-none border-0 py-2 ${
                     msg.user === "me"
                       ? "bg-[#c7a17a] text-white rounded-2xl rounded-br-md"
                       : "bg-[#ede0d4] text-brown-700 rounded-2xl rounded-bl-md"
@@ -228,19 +243,26 @@ export default function ChatPage() {
                                   {s.email}
                                 </div>
                               </div>
-                              <Link
-                                href={`/profile/${s.id}`}
+                              <Button
+                                onClick={() => {
+                                  router.push(`/profile/${s.id}`);
+                                }}
                                 className="ml-4 px-3 py-1 bg-[#c7a17a] text-white rounded-md text-xs font-semibold hover:bg-[#a98467] transition"
                               >
                                 프로필 보기
-                              </Link>
+                              </Button>
                             </div>
                           )
                         )}
                       </div>
                     ) : (
                       <>
-                        {msg.text}
+                        {msg.text.split("\n").map((line, idx) => (
+                          <React.Fragment key={idx}>
+                            {line}
+                            <br />
+                          </React.Fragment>
+                        ))}
                         {msg.user === "other" &&
                           msg.sources &&
                           msg.sources.length > 0 && (
@@ -286,11 +308,7 @@ export default function ChatPage() {
                                       <span className="font-semibold">
                                         관련도:
                                       </span>{" "}
-                                      {src.relevance_score} /{" "}
-                                      <span className="font-semibold">
-                                        다양성:
-                                      </span>{" "}
-                                      {src.temperature}
+                                      {src.relevance_score}
                                     </div>
                                   </li>
                                 ))}

@@ -64,6 +64,7 @@ export interface ChatResponse {
 export interface ChatRequest {
   user_id: string;
   text: string;
+  persona?: string;
 }
 
 // 채팅 POST API

@@ -1,5 +1,6 @@
 "use client";
 
+import { Coffee } from "lucide-react";
 import React from "react";
 
 type Profile = {
@@ -34,14 +35,28 @@ function sexToStr(sex?: number) {
 export default function ProfileCard({ profile }: { profile: Profile }) {
   return (
     <div className="w-full max-w-xl bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-      <div className="flex items-center gap-4 mb-6">
-        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-200 to-orange-200 flex items-center justify-center text-3xl font-bold text-brown-700">
-          {profile.user.name[0]}
+      <div className="flex justify-between">
+        <div className="flex items-center ju gap-4 mb-6">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-200 to-orange-200 flex items-center justify-center text-3xl font-bold text-brown-700">
+            {profile.user.name[0]}
+          </div>
+          <div className="flex flex-col">
+            <div className="text-xl font-bold">{profile.user.name}</div>
+            <div className="text-sm text-gray-500">
+              @{profile.user.nickname}
+            </div>
+            <div className="text-xs text-gray-400">{profile.user.email}</div>
+          </div>
         </div>
-        <div>
-          <div className="text-xl font-bold">{profile.user.name}</div>
-          <div className="text-sm text-gray-500">@{profile.user.nickname}</div>
-          <div className="text-xs text-gray-400">{profile.user.email}</div>
+        <div className="flex items-center gap-3">
+          {profile.ref_score !== undefined && (
+            <div className="flex items-center gap-1">
+              <img src="/logo.png" alt="Relevance Score" className="w-5 h-5" />
+              <span className="text-[15px] font-semibold text-[#c7a17a]">
+                {Math.round(profile.ref_score ?? 0)}°
+              </span>
+            </div>
+          )}
         </div>
       </div>
       <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm mb-4">
@@ -97,12 +112,6 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
           <div>
             <span className="font-semibold text-brown-700">성별</span>:{" "}
             {sexToStr(profile.user.sex)}
-          </div>
-        )}
-        {profile.ref_score !== undefined && (
-          <div>
-            <span className="font-semibold text-brown-700">추천점수</span>:{" "}
-            {profile.ref_score}
           </div>
         )}
       </div>
