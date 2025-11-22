@@ -1,4 +1,3 @@
-#main.py
 from fastapi import FastAPI
 from app.root import router as root_router
 from app.controller.UserController import router as user_router
@@ -8,4 +7,3 @@ app = FastAPI()
 app.include_router(root_router)
 app.include_router(user_router)
 # app.include_router(embedding_router)
-
