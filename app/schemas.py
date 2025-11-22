@@ -1,6 +1,9 @@
 from pydantic import BaseModel, EmailStr, constr
-from typing import Optional
+from typing import Optional, List
+from uuid import UUID
+from datetime import datetime
 
+# ----------------- User -----------------
 class UserCreate(BaseModel):
     name: str
     nickname: constr(min_length=2, max_length=15)
