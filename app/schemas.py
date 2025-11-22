@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from typing_extensions import Literal
 
 
+# ----------------- User -----------------
 class UserCreate(BaseModel):
     name: str
     nickname: constr(min_length=2, max_length=15)
