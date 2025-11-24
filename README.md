@@ -1,7 +1,7 @@
 # ☕️ Latte Chat — 나에게 딱 맞는 커리어 가이드 챗봇
 
 <p align="center">
-  <img src="coursefitImage" alt="Coursefit Logo" width="200"/>
+  <img src="coursefitImage" alt="LatteChat Logo" width="200"/>
 </p>
 
 🔗 **서비스 링크**:  https://unspitted-tomblike-annamaria.ngrok-free.dev -> http://localhost
