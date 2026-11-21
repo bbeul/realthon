@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+asyncpg
+sqlalchemy[asyncio]
+psycopg2-binary
+python-dotenv
+supabase
+openai
+pgvector
+sentence-transformers
+kiwipiepy
+pydantic[email]
+passlib[bcrypt]>=1.7.4,<2.0.0
+bcrypt>=3.2.0,<4.0.0
